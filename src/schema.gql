@@ -1,0 +1,152 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+"""Authentication response containing JWT token and user"""
+type AuthPayload {
+  accessToken: String!
+  user: User!
+}
+
+"""Payload for creating a post"""
+input CreatePostInput {
+  content: String!
+  published: Boolean = false
+  title: String!
+}
+
+"""Payload for creating a new user"""
+input CreateUserInput {
+  email: String!
+  name: String!
+  password: String!
+  role: UserRole = USER
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""Credentials for signing in"""
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  """Create a new post"""
+  createPost(input: CreatePostInput!): Post!
+
+  """Create a new user (Admin only)"""
+  createUser(input: CreateUserInput!): User!
+
+  """Delete a post (author or admin)"""
+  deletePost(id: ID!): Boolean!
+
+  """Delete a user (Admin only)"""
+  deleteUser(id: ID!): Boolean!
+
+  """Authenticate with email and password"""
+  login(input: LoginInput!): AuthPayload!
+
+  """Register a new user account"""
+  register(input: RegisterInput!): AuthPayload!
+
+  """Update an existing post (author or admin)"""
+  updatePost(id: ID!, input: UpdatePostInput!): Post!
+
+  """Update user profile"""
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+}
+
+"""Paginated list of posts"""
+type PaginatedPosts {
+  hasMore: Boolean!
+  items: [Post!]!
+  total: Int!
+}
+
+"""Paginated list of users"""
+type PaginatedUsers {
+  hasMore: Boolean!
+  items: [User!]!
+  total: Int!
+}
+
+"""Blog or article post"""
+type Post {
+  """Resolved via DataLoader"""
+  author: User
+  authorId: ID!
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  published: Boolean!
+  title: String!
+  updatedAt: DateTime!
+}
+
+type Query {
+  """Return the currently authenticated user"""
+  me: User!
+
+  """Find a single post by ID"""
+  post(id: ID!): Post!
+
+  """List published posts with pagination"""
+  posts(
+    """Maximum items to return"""
+    limit: Int! = 20
+
+    """Number of items to skip"""
+    offset: Int! = 0
+  ): PaginatedPosts!
+
+  """Find a user by ID"""
+  user(id: ID!): User!
+
+  """List users with pagination"""
+  users(
+    """Maximum items to return"""
+    limit: Int! = 20
+
+    """Number of items to skip"""
+    offset: Int! = 0
+  ): PaginatedUsers!
+}
+
+"""Payload for public user registration"""
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
+}
+
+"""Payload for updating a post"""
+input UpdatePostInput {
+  content: String
+  published: Boolean
+  title: String
+}
+
+"""Payload for updating an existing user"""
+input UpdateUserInput {
+  name: String
+}
+
+"""User account"""
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: ID!
+  name: String!
+  role: UserRole!
+  updatedAt: DateTime!
+}
+
+"""Role assigned to a user account"""
+enum UserRole {
+  ADMIN
+  USER
+}
