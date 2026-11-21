@@ -1,33 +1,64 @@
-import { Field, ID, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { UserRole } from '../../../common/decorators/roles.decorator';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { AccountStatus } from '../enums/account-status.enum';
 
-registerEnumType(UserRole, {
-  name: 'UserRole',
-  description: 'Role assigned to a user account',
-});
-
-@ObjectType({ description: 'User account' })
+@ObjectType({ description: 'Registered user account' })
+@Entity({ name: 'users' })
+@Index('IDX_users_phone_unique', ['phoneCountryCode', 'phoneNumber'], {
+  unique: true,
+})
 export class User {
   @Field(() => ID)
+  @PrimaryGeneratedColumn('uuid')
   id!: string;
 
   @Field(() => String)
-  email!: string;
+  @Column({
+    name: 'phone_country_code',
+    type: 'varchar',
+    length: 5,
+    default: '+91',
+  })
+  phoneCountryCode!: string;
 
   @Field(() => String)
-  name!: string;
+  @Column({ name: 'phone_number', type: 'varchar', length: 15 })
+  phoneNumber!: string;
 
-  @Field(() => UserRole)
-  role!: UserRole;
+  @Field(() => Date, { nullable: true })
+  @Column({ name: 'phone_verified_at', type: 'timestamp', nullable: true })
+  phoneVerifiedAt?: Date | null;
+
+  @Field(() => AccountStatus)
+  @Column({
+    name: 'status',
+    type: 'enum',
+    enum: AccountStatus,
+    enumName: 'account_status',
+    default: AccountStatus.ACTIVE,
+  })
+  status!: AccountStatus;
+
+  @Field(() => Date, { nullable: true })
+  @Column({ name: 'last_login_at', type: 'timestamp', nullable: true })
+  lastLoginAt?: Date | null;
 
   @Field(() => Date)
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt!: Date;
 
   @Field(() => Date)
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
   updatedAt!: Date;
-}
 
-export interface UserRecord extends User {
-  passwordHash: string;
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
+  deletedAt?: Date | null;
 }
-

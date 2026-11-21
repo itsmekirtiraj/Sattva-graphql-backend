@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { GraphQLFormattedError } from 'graphql';
 import { join } from 'node:path';
 import { DataloadersModule } from './common/dataloaders/dataloaders.module';
@@ -16,15 +17,37 @@ import { AppConfig, appConfig } from './config/app.config';
 import { validateEnv } from './config/env.validation';
 import { HealthController } from './health/health.controller';
 import { AuthModule } from './modules/auth/auth.module';
-import { PostsModule } from './modules/posts/posts.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: [`.env.${process.env.NODE_ENV ?? 'development'}`, '.env'],
       load: [appConfig],
       validate: validateEnv,
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const cfg = configService.getOrThrow<AppConfig>('app');
+        const db = cfg.database;
+        return {
+          type: 'postgres' as const,
+          ...(db.url
+            ? { url: db.url }
+            : {
+                host: db.host,
+                port: db.port,
+                username: db.username,
+                password: db.password,
+                database: db.name,
+              }),
+          ssl: db.ssl ? { rejectUnauthorized: false } : false,
+          autoLoadEntities: true,
+          synchronize: db.synchronize,
+        };
+      },
     }),
     JwtModule.registerAsync({
       global: true,
@@ -85,7 +108,6 @@ import { UsersModule } from './modules/users/users.module';
     DataloadersModule,
     UsersModule,
     AuthModule,
-    PostsModule,
   ],
   controllers: [HealthController],
   providers: [
@@ -104,4 +126,3 @@ import { UsersModule } from './modules/users/users.module';
   ],
 })
 export class AppModule {}
-
