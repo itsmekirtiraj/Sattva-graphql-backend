@@ -1,7 +1,7 @@
 {
-  "name": "nestjs-graphql-production-sample",
+  "name": "sattvamasterbackend",
   "version": "1.0.0",
-  "description": "Production-ready NestJS + GraphQL (Code-First) sample architecture",
+  "description": "Sattva Master Backend - NestJS + GraphQL (Code-First) with PostgreSQL",
   "author": "",
   "private": true,
   "license": "MIT",
@@ -28,13 +28,16 @@
     "@nestjs/graphql": "^13.0.3",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/platform-express": "^11.0.11",
+    "@nestjs/typeorm": "^11.0.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "dataloader": "^2.2.3",
     "graphql": "^16.10.0",
     "helmet": "^8.1.0",
+    "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "typeorm": "^1.1.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.5",

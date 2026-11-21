@@ -82,6 +82,8 @@ export class GraphQLExceptionFilter implements GqlExceptionFilter {
         return 'NOT_FOUND';
       case HttpStatus.CONFLICT:
         return 'CONFLICT';
+      case HttpStatus.TOO_MANY_REQUESTS:
+        return 'TOO_MANY_REQUESTS';
       default:
         return 'INTERNAL_SERVER_ERROR';
     }

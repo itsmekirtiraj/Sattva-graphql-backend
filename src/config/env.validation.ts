@@ -40,12 +40,79 @@ export class EnvironmentVariables {
 
   @IsString()
   @IsOptional()
-  JWT_EXPIRES_IN: string = '1d';
+  JWT_EXPIRES_IN: string = '15m';
+
+  @IsString()
+  @MinLength(16)
+  @IsOptional()
+  JWT_REFRESH_SECRET: string = 'dev-only-refresh-secret-change-in-production';
+
+  @IsString()
+  @IsOptional()
+  JWT_REFRESH_EXPIRES_IN: string = '30d';
 
   @IsBoolean()
   @IsOptional()
   @Transform(({ value }) => value === 'true' || value === true)
   GRAPHQL_PLAYGROUND: boolean = true;
+
+  @IsString()
+  @IsOptional()
+  DATABASE_URL?: string;
+
+  @IsString()
+  @IsOptional()
+  DB_HOST: string = 'localhost';
+
+  @IsInt()
+  @Min(1)
+  @Max(65535)
+  @IsOptional()
+  @Transform(({ value }) => (value !== undefined ? Number(value) : 5432))
+  DB_PORT: number = 5432;
+
+  @IsString()
+  @IsOptional()
+  DB_USERNAME: string = 'postgres';
+
+  @IsString()
+  @IsOptional()
+  DB_PASSWORD: string = 'postgres';
+
+  @IsString()
+  @IsOptional()
+  DB_NAME: string = 'sattvamasterbackend';
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  DB_SSL: boolean = false;
+
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  DB_SYNCHRONIZE: boolean = false;
+
+  @IsInt()
+  @Min(1)
+  @Max(60)
+  @IsOptional()
+  @Transform(({ value }) => (value !== undefined ? Number(value) : 5))
+  OTP_EXPIRY_MINUTES: number = 5;
+
+  @IsInt()
+  @Min(1)
+  @Max(20)
+  @IsOptional()
+  @Transform(({ value }) => (value !== undefined ? Number(value) : 5))
+  OTP_MAX_ATTEMPTS: number = 5;
+
+  @IsInt()
+  @Min(0)
+  @Max(600)
+  @IsOptional()
+  @Transform(({ value }) => (value !== undefined ? Number(value) : 60))
+  OTP_RESEND_COOLDOWN_SECONDS: number = 60;
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvironmentVariables {
@@ -66,4 +133,3 @@ export function validateEnv(config: Record<string, unknown>): EnvironmentVariabl
 
   return validatedConfig;
 }
-
