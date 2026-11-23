@@ -26,11 +26,17 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  """Mark onboarding as completed for the current user"""
+  completeOnboarding: UserProfile!
+
   """Send an OTP to an existing user phone number for login"""
   requestLoginOtp(input: RequestLoginOtpInput!): RequestOtpResponse!
 
   """Send an OTP to the user phone number for registration"""
   requestRegistrationOtp(input: RequestRegistrationOtpInput!): RequestOtpResponse!
+
+  """Create or update the currently authenticated user profile"""
+  upsertMyProfile(input: UpsertUserProfileInput!): UserProfile!
 
   """Verify login OTP and issue bearer tokens"""
   verifyLoginOtp(input: VerifyLoginOtpInput!): AuthPayload!
@@ -49,6 +55,9 @@ enum OtpPurpose {
 type Query {
   """Get the currently authenticated user"""
   me: User!
+
+  """Get the currently authenticated user profile"""
+  myProfile: UserProfile
 }
 
 """Input for requesting a login OTP"""
@@ -79,6 +88,26 @@ input RequestRegistrationOtpInput {
   phoneNumber: String!
 }
 
+"""Input for creating or updating a user profile"""
+input UpsertUserProfileInput {
+  city: String
+  country: String
+
+  """Date of birth in YYYY-MM-DD format"""
+  dateOfBirth: String
+  displayName: String
+  firstName: String
+  gender: UserGender
+  lastName: String
+
+  """Set true to mark onboarding as completed"""
+  markOnboardingCompleted: Boolean
+  preferredLanguage: String
+  profileImageUrl: String
+  state: String
+  timezone: String
+}
+
 """Registered user account"""
 type User {
   createdAt: DateTime!
@@ -87,8 +116,38 @@ type User {
   phoneCountryCode: String!
   phoneNumber: String!
   phoneVerifiedAt: DateTime
+
+  """User profile details"""
+  profile: UserProfile
   status: AccountStatus!
   updatedAt: DateTime!
+}
+
+"""User gender"""
+enum UserGender {
+  FEMALE
+  MALE
+}
+
+"""User profile details"""
+type UserProfile {
+  city: String
+  country: String
+  createdAt: DateTime!
+
+  """Date of birth in YYYY-MM-DD format"""
+  dateOfBirth: String
+  displayName: String
+  firstName: String
+  gender: UserGender
+  lastName: String
+  onboardingCompletedAt: DateTime
+  preferredLanguage: String
+  profileImageUrl: String
+  state: String
+  timezone: String
+  updatedAt: DateTime!
+  userId: ID!
 }
 
 """Input for verifying login OTP and issuing bearer tokens"""
