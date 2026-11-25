@@ -20,20 +20,88 @@ type AuthPayload {
   user: User!
 }
 
+"""Input for creating a measurement type"""
+input CreateMeasurementTypeInput {
+  category: String!
+  code: String!
+  defaultUnit: String!
+  description: String
+  isActive: Boolean! = true
+  name: String!
+}
+
+"""Input for recording a new user measurement"""
+input CreateUserMeasurementInput {
+  measuredAt: DateTime!
+  measurementTypeId: Int!
+  notes: String
+  source: MeasurementSource! = USER
+
+  """
+  Optional unit; defaults to the measurement type defaultUnit when omitted
+  """
+  unit: String
+
+  """
+  Non-negative decimal value up to 7 integer digits and 3 fractional digits
+  """
+  value: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+"""Origin of a recorded user measurement"""
+enum MeasurementSource {
+  AI_ESTIMATE
+  DEVICE
+  DIETITIAN
+  IMPORTED
+  USER
+}
+
+"""Master catalog of supported health and body measurements"""
+type MeasurementType {
+  category: String!
+  code: String!
+  createdAt: DateTime!
+  defaultUnit: String!
+  description: String
+  id: Int!
+  isActive: Boolean!
+  name: String!
+  updatedAt: DateTime!
+}
+
 type Mutation {
   """Mark onboarding as completed for the current user"""
   completeOnboarding: UserProfile!
+
+  """Create a new measurement type (Admin only)"""
+  createMeasurementType(input: CreateMeasurementTypeInput!): MeasurementType!
+
+  """Record a new measurement for the authenticated user"""
+  createUserMeasurement(input: CreateUserMeasurementInput!): UserMeasurement!
+
+  """Deactivate a measurement type (Admin only)"""
+  deleteMeasurementType(id: Int!): Boolean!
+
+  """Soft-delete a measurement owned by the authenticated user"""
+  deleteUserMeasurement(id: ID!): Boolean!
 
   """Send an OTP to an existing user phone number for login"""
   requestLoginOtp(input: RequestLoginOtpInput!): RequestOtpResponse!
 
   """Send an OTP to the user phone number for registration"""
   requestRegistrationOtp(input: RequestRegistrationOtpInput!): RequestOtpResponse!
+
+  """Update an existing measurement type (Admin only)"""
+  updateMeasurementType(id: Int!, input: UpdateMeasurementTypeInput!): MeasurementType!
+
+  """Update notes on a measurement owned by the authenticated user"""
+  updateUserMeasurement(id: ID!, input: UpdateUserMeasurementInput!): UserMeasurement!
 
   """Create or update the currently authenticated user profile"""
   upsertMyProfile(input: UpsertUserProfileInput!): UserProfile!
@@ -52,12 +120,51 @@ enum OtpPurpose {
   REGISTRATION
 }
 
+type PaginatedMeasurementTypes {
+  hasMore: Boolean!
+  items: [MeasurementType!]!
+  total: Int!
+}
+
+type PaginatedUserMeasurements {
+  hasMore: Boolean!
+  items: [UserMeasurement!]!
+  total: Int!
+}
+
 type Query {
   """Get the currently authenticated user"""
   me: User!
 
+  """List supported measurement sources"""
+  measurementSources: [MeasurementSource!]!
+
+  """Get a single measurement type by ID"""
+  measurementType(id: Int!): MeasurementType!
+
+  """List measurement types with pagination"""
+  measurementTypes(
+    """Maximum items to return"""
+    limit: Int! = 20
+
+    """Number of items to skip"""
+    offset: Int! = 0
+  ): PaginatedMeasurementTypes!
+
   """Get the currently authenticated user profile"""
   myProfile: UserProfile
+
+  """Get a single measurement owned by the authenticated user"""
+  userMeasurement(id: ID!): UserMeasurement!
+
+  """List measurements for the authenticated user"""
+  userMeasurements(
+    """Maximum items to return"""
+    limit: Int! = 20
+
+    """Number of items to skip"""
+    offset: Int! = 0
+  ): PaginatedUserMeasurements!
 }
 
 """Input for requesting a login OTP"""
@@ -86,6 +193,21 @@ input RequestRegistrationOtpInput {
 
   """Local phone number without country code (digits only)"""
   phoneNumber: String!
+}
+
+"""Input for updating a measurement type"""
+input UpdateMeasurementTypeInput {
+  category: String
+  code: String
+  defaultUnit: String
+  description: String
+  isActive: Boolean
+  name: String
+}
+
+"""Input for updating notes on an existing user measurement"""
+input UpdateUserMeasurementInput {
+  notes: String
 }
 
 """Input for creating or updating a user profile"""
@@ -127,6 +249,24 @@ type User {
 enum UserGender {
   FEMALE
   MALE
+}
+
+"""Historical user health or body measurement reading"""
+type UserMeasurement {
+  createdAt: DateTime!
+  id: ID!
+  measuredAt: DateTime!
+  measurementType: MeasurementType!
+  measurementTypeId: Int!
+  notes: String
+  recordedByUserId: ID!
+  source: MeasurementSource!
+  unit: String!
+  updatedAt: DateTime!
+  userId: ID!
+
+  """Exact non-negative decimal value, up to three fractional digits"""
+  value: String!
 }
 
 """User profile details"""
